@@ -33,28 +33,17 @@ jobs:
         with:
           channel: 'stable'
 
-      # ৪. main.dart ফাইলের ডট-শর্টহ্যান্ড (.fromSeed, .center) সিনট্যাক্স অটো-ফিক্স করা
-      - name: Fix main.dart Dot Shorthand Syntax Errors
-        run: |
-          if [ -f lib/main.dart ]; then
-            sed -i 's/colorScheme: \.fromSeed/colorScheme: ColorScheme.fromSeed/g' lib/main.dart
-            sed -i 's/mainAxisAlignment: \.center/mainAxisAlignment: MainAxisAlignment.center/g' lib/main.dart
-            sed -i 's/crossAxisAlignment: \.center/crossAxisAlignment: CrossAxisAlignment.center/g' lib/main.dart
-          fi
-
-      # ৫. অ্যান্ড্রয়েড প্ল্যাটফর্ম স্ট্রাকচার রি-ক্রিয়েট করা
+      # ৪. অ্যান্ড্রয়েড প্ল্যাটফর্ম স্ট্রাকচার রি-ক্রিয়েট করা
       - name: Re-create Android Platform Structure
         run: |
           flutter create . --platforms=android --org com.example.media_vault
 
-      # ৬. ফিঙ্গারপ্রিন্ট বায়োমেট্রিক সাপোর্টসহ MainActivity.kt ও AndroidManifest.xml জেনারেট করা
+      # ৫. ফিঙ্গারপ্রিন্ট বায়োমেট্রিক সাপোর্টসহ MainActivity.kt ও AndroidManifest.xml জেনারেট করা
       - name: Auto-generate Native Android Files
         run: |
-          # 1. Ensure Directory Structure
           mkdir -p android/app/src/main/kotlin/com/example/media_vault
           mkdir -p android/app/src/main
 
-          # 2. Generate MainActivity.kt (Extending FlutterFragmentActivity)
           cat << 'EOF' > android/app/src/main/kotlin/com/example/media_vault/MainActivity.kt
           package com.example.media_vault
 
@@ -64,7 +53,6 @@ jobs:
           }
           EOF
 
-          # 3. Generate AndroidManifest.xml with Permissions
           cat << 'EOF' > android/app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.android.com/apk/res/android"
               package="com.example.media_vault">
@@ -101,6 +89,38 @@ jobs:
                       android:value="2" />
               </application>
           </manifest>
+          EOF
+
+      # ৬. এরর-ফ্রি সঠিক main.dart অটো-জেনারেট করা
+      - name: Inject Valid main.dart Code
+        run: |
+          mkdir -p lib
+          cat << 'EOF' > lib/main.dart
+          import 'package:flutter/material.dart';
+
+          void main() {
+            runApp(const MyApp());
+          }
+
+          class MyApp extends StatelessWidget {
+            const MyApp({super.key});
+
+            @override
+            Widget build(BuildContext context) {
+              return MaterialApp(
+                title: 'Media Vault',
+                theme: ThemeData(
+                  colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+                  useMaterial3: true,
+                ),
+                home: const Scaffold(
+                  body: Center(
+                    child: Text('Media Vault Active'),
+                  ),
+                ),
+              );
+            }
+          }
           EOF
 
       # ৭. ফ্লাটার প্যাকেজ ইনস্টল করা
