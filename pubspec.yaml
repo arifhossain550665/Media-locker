@@ -1,0 +1,49 @@
+name: media_vault
+description: "A professional media vault application to lock photos and videos using AES-256 encryption, 6-digit PIN, and biometric authentication."
+publish_to: 'none' # Remote pub.dev-এ পাবলিশ হওয়া আটকাবে
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI Icons & Styling
+  cupertino_icons: ^1.0.8
+
+  # Biometric Authentication (Fingerprint / Face ID)
+  local_auth: ^2.3.0
+
+  # Secure Storage for PIN
+  flutter_secure_storage: ^9.2.2
+
+  # Pick Images and Videos from Gallery
+  file_picker: ^8.1.2
+
+  # Get App Storage Path
+  path_provider: ^2.1.4
+  path: ^1.9.0
+
+  # AES-256 Encryption & Cryptography
+  encrypt: ^5.0.3
+  crypto: ^3.0.5
+
+  # Restore Images & Videos back to Public Gallery / MediaStore
+  gal: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Standard Linter Rules
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Asset Files (Image/Logo থাকলে এখানে পাথ এড করতে হবে)
+  # assets:
+  #   - assets/images/logo.png
