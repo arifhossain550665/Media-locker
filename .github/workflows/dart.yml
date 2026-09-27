@@ -20,32 +20,41 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # ২. জাবা সেটআপ (এখানে cache: 'gradle' তুলে দেওয়া হয়েছে যেন Gradle ফাইল না পেলেও এরর না দেয়)
+      # ২. জাবা SDK (JDK 17) সেটআপ করা
       - name: Set up Java Development Kit (JDK 17)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      # ৩. ফ্লাটার SDK সেটআপ
+      # ৩. ফ্লাটার SDK সেটআপ করা
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      # ৪. যদি অ্যান্ড্রয়েড ফোল্ডার না থাকে তবে অটোমেটিক Flutter প্রজেক্ট ফাইলস তৈরি করা
-      - name: Re-create Android Project Platform Structure
+      # ৪. main.dart ফাইলের ডট-শর্টহ্যান্ড (.fromSeed, .center) সিনট্যাক্স অটো-ফিক্স করা
+      - name: Fix main.dart Dot Shorthand Syntax Errors
+        run: |
+          if [ -f lib/main.dart ]; then
+            sed -i 's/colorScheme: \.fromSeed/colorScheme: ColorScheme.fromSeed/g' lib/main.dart
+            sed -i 's/mainAxisAlignment: \.center/mainAxisAlignment: MainAxisAlignment.center/g' lib/main.dart
+            sed -i 's/crossAxisAlignment: \.center/crossAxisAlignment: CrossAxisAlignment.center/g' lib/main.dart
+          fi
+
+      # ৫. অ্যান্ড্রয়েড প্ল্যাটফর্ম স্ট্রাকচার রি-ক্রিয়েট করা
+      - name: Re-create Android Platform Structure
         run: |
           flutter create . --platforms=android --org com.example.media_vault
 
-      # ৫. অ্যান্ড্রয়েড নেটিভ ফাইলসমূহ (MainActivity.kt ও AndroidManifest.xml) কাস্টমাইজ ও ওভাররাইট করা
-      - name: Auto-generate Required Native Files for Biometrics
+      # ৬. ফিঙ্গারপ্রিন্ট বায়োমেট্রিক সাপোর্টসহ MainActivity.kt ও AndroidManifest.xml জেনারেট করা
+      - name: Auto-generate Native Android Files
         run: |
           # 1. Ensure Directory Structure
           mkdir -p android/app/src/main/kotlin/com/example/media_vault
           mkdir -p android/app/src/main
 
-          # 2. Generate MainActivity.kt (Extending FlutterFragmentActivity for Biometrics)
+          # 2. Generate MainActivity.kt (Extending FlutterFragmentActivity)
           cat << 'EOF' > android/app/src/main/kotlin/com/example/media_vault/MainActivity.kt
           package com.example.media_vault
 
@@ -55,7 +64,7 @@ jobs:
           }
           EOF
 
-          # 3. Generate AndroidManifest.xml
+          # 3. Generate AndroidManifest.xml with Permissions
           cat << 'EOF' > android/app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.android.com/apk/res/android"
               package="com.example.media_vault">
@@ -67,7 +76,7 @@ jobs:
               <uses-permission android:permission="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
               <application
-                  android:label="Media Vault"
+                  android:label="AH Media Locker"
                   android:name="${applicationName}"
                   android:icon="@mipmap/ic_launcher">
                   <activity
@@ -94,16 +103,16 @@ jobs:
           </manifest>
           EOF
 
-      # ৬. ফ্লাটার প্যাকেজ ইনস্টল করা
+      # ৭. ফ্লাটার প্যাকেজ ইনস্টল করা
       - name: Install Dependencies
         run: flutter pub get
 
-      # ৭. APK বিল্ড তৈরি করা
+      # ৮. Release APK তৈরি করা
       - name: Build Release APK
         run: flutter build apk --release
 
-      # ৮. APK ফাইল অ্যাকশন আর্টফ্যাক্ট হিসেবে আপলোড করা
-      - name: Upload Build Artifacts
+      # ৯. তৈরি হওয়া APK গিটহাব অ্যাকশন আর্টফ্যাক্ট হিসেবে আপলোড করা
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: flutter-media-vault-apk
